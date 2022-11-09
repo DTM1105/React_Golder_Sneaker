@@ -8,8 +8,7 @@ class Cart extends Component {
       list: [],
       sl: 1,
       total: 0,
-      t:1,
-      
+      t: 1,
     };
   }
   componentDidMount() {
@@ -38,10 +37,18 @@ class Cart extends Component {
     }
   }
   handleRemovetocart = (product) => {
-    let { list} = this.state;
+    let { list, total } = this.state;
     if (list && list.length > 0) {
       list = list.map((item) => {
-        if (item.id === product.id) item.isSelected = !item.isSelected;
+        if (item.id === product.id) {
+          item.isSelected = !item.isSelected;
+          item.isCash = true;
+          total = total - product.quantity * product.price;
+          total = this.roundToTwo(total);
+          this.setState({
+            total: total,
+          });
+        }
         return item;
       });
       this.setState({
@@ -70,22 +77,27 @@ class Cart extends Component {
   handleDecrement = (product) => {
     let { list } = this.state;
     let { total } = this.state;
+    console.log("chua tru", total);
     if (list && list.length > 0) {
       list = list.map((item) => {
-        if(item.id === product.id){
-            product.quantity = product.quantity - 1;
-            total = total - product.price;
-            total = this.roundToTwo(total);
-            this.setState({
-              sl: product.quantity,
-              total: total,
-            });
-            if (product.quantity < 1) {
-              product.isSelected = !product.isSelected;
-            }
-            // this.setState({
-            //     list:list
-            // })
+        if (item.id === product.id) {
+          product.quantity = product.quantity - 1;
+          total = total - product.price;
+          total = this.roundToTwo(total);
+          this.setState({
+            sl: product.quantity,
+            total: total,
+          });
+          if (product.quantity < 1) {
+            product.isSelected = !product.isSelected;
+            product.isCash = true;
+
+            this.props.parentCallback(list);
+            console.log(list);
+          }
+          // this.setState({
+          //     list:list
+          // })
         }
       });
     }
@@ -104,7 +116,7 @@ class Cart extends Component {
           <div class="card-body">
             <div class="cart-items">
               <div>
-                {list && 
+                {list &&
                   list.map((item, index) => {
                     if (item.isSelected === true) {
                       return (
@@ -154,9 +166,7 @@ class Cart extends Component {
                         </div>
                       );
                     }
-                    
-                  }) 
-            }
+                  })}
               </div>
             </div>
           </div>
